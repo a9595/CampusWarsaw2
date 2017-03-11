@@ -1,0 +1,81 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'kotlin-android'
+//apply plugin: 'com.infullmobile.toolkit'
+
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+    defaultConfig {
+        applicationId "com.tieorange.campuswarsaw2"
+        minSdkVersion 21
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+   /* androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:25.2.0'
+    testCompile 'junit:junit:4.12'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+
+*/
+
+
+
+    kapt daggerCompiler
+    compile androidAppCompat
+    compile androidDesign
+    compile androidAnnotations
+    compile androidTransitions
+    compile androidCardView
+    compile(mvp, { exclude group: 'com.android.support' })
+    compile findBugs
+    compile dagger
+//    compile kotlin
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
+    compile loggingInterceptor
+    compile mvp
+    compile picasso
+    compile playServicesMaps
+    compile playServicesLocation
+    compile rxJava
+    compile rxJavaAndroid
+    compile picasso
+    compile retrofit
+    compile retrofitGsonConverter
+    compile retrofitCallAdapter
+    compile rxLocation
+    compile group: 'org.jsoup', name: 'jsoup', version: '1.9.1'
+
+
+    testCompile(assertJ) { exclude module: 'support-annotations' }
+    testCompile junit
+    testCompile mockito
+    testCompile mvpTestKotlin
+    testCompile kotlinReflection
+    testCompile robolectric
+    testCompile robolectricOpenGlMissingDependency
+    testCompile robolectricShadows
+
+    androidTestCompile androidAnnotations
+    androidTestCompile espresso
+    androidTestCompile testRules
+    androidTestCompile testRunner
+}
+repositories {
+    mavenCentral()
+}
