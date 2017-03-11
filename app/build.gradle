@@ -75,6 +75,7 @@ dependencies {
     androidTestCompile espresso
     androidTestCompile testRules
     androidTestCompile testRunner
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
 }
 repositories {
     mavenCentral()
