@@ -7,6 +7,16 @@ import org.jsoup.Jsoup
 import android.R.id.message
 import android.util.Log
 import android.webkit.*
+import android.webkit.ValueCallback
+import com.google.android.gms.tasks.Tasks.await
+import com.google.android.gms.tasks.Tasks.call
+import io.reactivex.Observable
+import io.reactivex.Scheduler
+import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
+import org.jsoup.nodes.Document
+
 
 open class MainPresenter(private val model: MainModel,
                          view: MainView) : Presenter<MainView>(view) {
@@ -18,42 +28,38 @@ open class MainPresenter(private val model: MainModel,
     private fun loadData() {
         val url = "https://www.campus.co/warsaw/en/events"
 
-        val browser = WebView(context)
+        Single.fromCallable { Jsoup.connect(url).get() }
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        {
+                            parseHtmlContent(it)
+                        },
+                        { /*TODO handle errors*/ })
+    }
 
-        /* JavaScript must be enabled if you want it to work, obviously */
-        browser.settings.javaScriptEnabled = true
 
-        /* *//* Register a new JavaScript interface called HTMLOUT *//*
-        val myJavaScriptInterface = object : MyJavaScriptInterface() {
-            override fun processHTML(html: String) {
-                presentedView.showHtmlContent(html)
-            }
+    fun parseHtmlContent(htmlContent: Document) {
+        val eventsList = ArrayList<Event>()
 
-        }*/
-        val htmlContentRetrieved: (String) -> Unit = {
-            presentedView.showHtmlContent(it)
-        }
-        browser.addJavascriptInterface(MyJavaScriptInterface(htmlContentRetrieved), "HTMLOUT")
+        //        val document = Jsoup.parse(htmlContent)
+        val events = htmlContent.select("h4")
+        events.mapTo(eventsList) { Event(it.text(), "14:00") }
 
-        /* WebViewClient must be set BEFORE calling loadUrl! */
-        browser.setWebViewClient(object : WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                /* This call inject JavaScript into the page which just finished loading. */
-                browser.loadUrl("javascript:window.HTMLOUT.processHTML('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>');")
-            }
-        })
-        /* load a web page */
-        browser.loadUrl(url)
+        presentedView.showEvents(eventsList)
     }
 
 }
 
+data class Event(val name: String, val date: String)
+
 
 /* An instance of this class will be registered as a JavaScript interface */
-class MyJavaScriptInterface(private val function: (String) -> Unit) {
+class MyJavaScriptInterface(private val callback: (String) -> Unit) {
+
     @JavascriptInterface
     @SuppressWarnings("unused")
     fun processHTML(html: String) {
-        function.invoke(html)
+        callback(html)
     }
 }
